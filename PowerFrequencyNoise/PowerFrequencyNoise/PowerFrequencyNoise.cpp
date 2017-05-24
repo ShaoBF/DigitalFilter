@@ -54,7 +54,7 @@ void IIR(double H[][2][5], int bandType, double db1, double db2, double fs, doub
         }
         PrintH(H, L);
     }
-    _getch();
+    //_getch();
 }
 void Resp(COMPLEX Y[], COMPLEX X[], double H[][2][5]){
     COMPLEX HF[MAX_SIZE];
@@ -113,10 +113,10 @@ void SaveData(char* filePath, COMPLEX ecdf[], int SegCount, int SegLength){
 void main(int argC, char* argV){
     FILE *fp2;//定义文件流指针，用于打开写操作的文件
     char text[1024];//定义一个字符串数组，用于存储读取的字符
-    double ecd[MAX_SIZE];
-    COMPLEX ECD[MAX_SIZE];
-    COMPLEX ECDF[MAX_SIZE];
-    COMPLEX ecdf[MAX_SIZE];
+    double *ecd=new double[MAX_SIZE];
+    COMPLEX *ECD = new COMPLEX[MAX_SIZE];
+    COMPLEX *ECDF = new COMPLEX[MAX_SIZE];
+    COMPLEX *ecdf = new COMPLEX[MAX_SIZE];
     double H[10][2][5];
     double b[100];
     char* filePath = "d:\\ShaoBF\\DataForSignal\\119_heart1.txt";
@@ -133,7 +133,7 @@ void main(int argC, char* argV){
     double f2 = 50;
     double f3 = 60;
     double f4 = 65;
-    IIR(H, bandType, db1, db2, fs, f3, f4, f1, f2);
+    IIR(H, bandType, db1, db2, fs, f1, f2, f3, f4);
 
     //输入信号做FFT得到ECD（n）。
     for (int i = 0; i < SegCount*SegLength; i++){
@@ -149,11 +149,18 @@ void main(int argC, char* argV){
     Resp(ECDF, ECD, H);
 
     //ECDF做IFFT得到ecdf即为所求
+    for (int i = 0; i < MAX_SIZE; i++){
+        ecdf[i] = ECDF[i];
+    }
     fft(ecdf, MAX_SIZE, -1);
 
     //ecdf输出到文件
-    filePath = "d:\\ShaoBF\\FileTest\\b.txt";
+    filePath = "d:\\ShaoBF\\DataForSignal\\119_heart1_filted.txt";
     SaveData(filePath, ecdf, SegCount, SegLength);
+    delete ecd;
+    delete ECD;
+    delete ECDF;
+    delete ecdf;
     system("pause");
     return;
 }
